@@ -1,0 +1,42 @@
+First announcement: Project evaluation consists of two components:
+Presentation performance (50%)
+Quality of the GitHub repository for your project's codebase (50%)
+You are required to address every methodology discussed in the lectures and provide
+comprehensive documentation detailing how each was applied, how hyperparameters were
+tuned, the rationale for selecting specific methodologies over others, and which methods
+were executed simultaneously. Additionally, compare the performance of these methods
+based on relevant evaluation criteria for your problem. The quality of your dataset will also
+be assessed. All of these details must be included in a REPORT.md file within your GitHub
+repository.
+You will also create another folder called `responsibilities/`, and there will be files named
+after each student number (e.g., 23023023.md) where you explain your responsibilities on
+that project and how you delivered on that task.
+Second announcement: Dear all,
+For your projects, I would like to see how you have applied the concepts we have covered so
+far. I do not expect broad, superficial projects that attempt to address the entire syllabus
+using AI. Instead, I encourage you to select focused topics and demonstrate depth in the
+methodologies we have studied. You may, of course, incorporate AI as appropriate.
+You may receive bonus points if you incorporate topics that we have not yet covered,
+provided you have thoroughly addressed all topics from the past four weeks.
+I suggest avoiding asking AI for generic project ideas based solely on the course title.
+Instead: "These are the materials we covered so far. Give me 5 project ideas based on these
+and focus on depth and demonstration of application methodologies rather than real-world
+problem solving."
+This approach aligns with our course focus on methodology. While your final project may
+allow for greater creativity, this assignment should prioritize methodological rigor.
+Best.
+Third announcement: You need to upload a PDF or PPTX for the presentation and a GitHub
+URL for the code.
+Read previous announcements for more detailed instructions.
+The minimum I'm looking for is for you to apply the algorithms in the labs to your dataset
+and explain exactly why you picked the specific approach over the other.
+The code dimensions I check are:
+Code correctness and topic inclusions (25%)
+Number of methods (25%)
+Technical documentation (25%)
+Technical depth of methods (25%)
+For presentations:
+Time management (30%)
+Technical explanation depth and jargon (40%)
+Tempo, engagement, and fluency (30%) - if you read from somewhere, you will get 0
+Fourth announcement: the presentation must be 3 minutes long no longer than that.

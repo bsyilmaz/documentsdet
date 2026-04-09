@@ -1,0 +1,572 @@
+﻿Deep	Learning	—	Chapter	5:	Machine	Learning	Basics	
+Study	Guide:	Key	Nuances	and	Deeper	Insights	
+Prepared	By:	Asst.	Prof.	Yiğit	Bekir	Kaya	
+
+Reference:	Goodfellow,	Bengio,	Courville	—	Deep	Learning	(2016)	
+
+1.	Linear	Regression:	The	Design	Matrix	
+The	prediction	hypothesis	is	ŷ	=	wᵀx,	where	w	is	the	learnable	weight	vector.	The	
+design	matrix	X	(m	×	n)	organizes	the	dataset	with	m	rows	(samples/observations)	
+and	n	columns	(features).	Each	row	is	one	data	point;	each	column	is	one	measured	
+attribute.	
+Key	nuance:	The	normal	equation	w	=	(XᵀX)⁻¹Xᵀy	gives	the	optimal	weights	in	one	
+step	—	no	iteration	needed.	However,	inverting	XᵀX	is	O(n³),	making	it	impractical	
+when	n	(features)	is	large.	This	motivates	gradient	descent	for	complex	models.	
+
+2.	Generalization	and	the	i.i.d.	Assumption	
+Machine	learning	differs	from	pure	optimization:	optimization	minimizes	training	
+error,	while	ML	aims	to	minimize	test	(generalization)	error.	The	theoretical	
+guarantee	that	training	performance	transfers	to	test	performance	relies	on	the	i.i.d.	
+assumption.	
+i.i.d.	=	Independent	and	Identically	Distributed.	Independent	means	knowing	one	
+sample	tells	you	nothing	about	another.	Identically	distributed	means	every	sample	
+comes	from	the	same	underlying	probability	distribution	p_data.	
+Key	nuance:	The	i.i.d.	assumption	is	heavily	violated	in	modern	LLMs	—	text	tokens	
+are	correlated,	training	corpora	mix	wildly	different	distributions,	and	deployment	
+distributions	differ	from	training.	LLMs	generalize	despite	this	due	to	massive	data	
+scale,	implicit	regularization,	and	architectural	inductive	biases.	The	theoretical	
+understanding	of	why	this	works	remains	an	active	research	area.	
+
+3.	Capacity	vs.	Error	
+Capacity	is	not	simply	parameter	count.	It	refers	to	the	model’s	ability	to	fit	a	wide	
+variety	of	functions	—	the	expressiveness	of	the	hypothesis	space.	Contributing	
+factors	include:	number	of	parameters,	the	family	of	functions	representable,	and	
+architectural	choices	(depth	vs.	width).	
+Key	nuance:	Two	models	with	the	same	parameter	count	can	have	very	different	
+effective	capacity.	A	deep	narrow	network	has	higher	effective	capacity	than	a	shallow	
+wide	one	because	depth	enables	compositional	representations.	The	formal	measure	
+is	VC	dimension	(the	largest	number	of	points	a	model	can	shatter),	but	in	practice	
+parameter	count	is	used	as	a	rough	proxy.	
+
+ 
+
+
+
+	
+
+4.	Regularization	and	the	Cost	Function	J(w)	
+J(w)	is	the	cost	function	the	optimizer	minimizes.	With	weight	decay:	J(w)	=	
+MSE_train	+	λwᵀw.	The	first	term	measures	prediction	error;	the	second	penalizes	
+large	weights	(L2	regularization	/	Ridge	regression).	The	term	wᵀw	is	the	dot	product	
+of	the	weight	vector	with	itself,	i.e.,	the	sum	of	all	squared	weights.	
+λ	(lambda)	is	a	hyperparameter	you	set,	not	something	learned.	When	λ	→	∞,	weights	
+are	crushed	to	zero	(underfitting,	flat	line).	When	λ	→	0,	no	penalty	(overfitting,	
+wiggly	fit).	Balanced	λ	yields	a	smooth,	generalizable	fit.	
+Key	nuance:	Regularization	has	a	deep	Bayesian	interpretation.	L2	regularization	is	
+mathematically	equivalent	to	placing	a	Gaussian	prior	on	the	weights.	Saying	“keep	
+weights	small”	via	a	penalty	term	is	the	same	as	saying	“I	believe	weights	are	drawn	
+from	a	Gaussian	centered	at	zero.”	No	regularization	is	equivalent	to	a	flat/uniform	
+prior	—	a	surprisingly	strong	and	often	unreasonable	assumption.	
+
+5.	Point	Estimation:	θ	vs.	θM 	
+θ	(theta)	is	the	true	parameter	value	—	fixed	but	unknown.	It	is	the	general	notation	
+for	whatever	parameters	your	model	has	(for	linear	regression,	θ	=	w).	θf 	(theta-hat)	is	
+the	estimate,	a	function	of	data	and	therefore	a	random	variable.	Different	training	
+sets	yield	different	θf 	values.	
+Key	nuance:	θ	is	NOT	y.	It	is	the	hidden	truth	about	the	data-generating	process	(e.g.,	
+the	true	average	height	of	all	adults	in	Turkey	is	θ).	The	notation	switches	from	w	to	θ	
+because	point	estimation	theory	applies	to	any	model,	not	just	linear	regression.	For	a	
+Gaussian,	θ	=	{μ,	σ}.	For	a	neural	network,	θ	=	all	millions	of	weights	and	biases.	
+
+6.	Bias	and	Variance:	The	Dart	Board	Analogy	
+Bias	=	E[θ> ]	−	θ.	If	you	repeated	the	entire	experiment	infinitely	many	times	and	
+averaged	all	θf 	values,	bias	measures	how	far	that	average	lands	from	the	true	θ.	High	
+bias	=	systematically	aimed	wrong	(consistent	but	off-target).	Low	bias	=	aimed	at	the	
+bullseye	on	average.	
+Variance	=	Var(θ> ).	How	much	the	estimate	fluctuates	across	different	datasets.	
+Standard	error	SE	=	σ/√m	tells	you	precision	improves	with	the	square	root	of	
+sample	size.	Practical	implication:	you	need	to	quadruple	data	to	halve	the	standard	
+error	(diminishing	returns).	
+Key	nuance:	Bias	is	a	problem	of	wrong	assumptions	—	fix	by	changing	your	model.	
+Variance	is	a	problem	of	insufficient	data	or	excess	flexibility	—	fix	with	more	data	or	
+regularization.	In	modern	deep	learning,	the	classical	bias-variance	U-curve	is	
+violated:	models	with	billions	of	parameters	(far	beyond	the	“overfitting	zone”)	still	
+generalize	well,	a	phenomenon	called	“double	descent.”	
+
+7.	MLE	and	MSE:	Two	Sides	of	One	Coin	
+
+ 
+
+
+
+	
+
+MSE	is	not	an	arbitrary	choice	of	loss	function.	If	you	assume	the	true	y	deviates	from	
+your	prediction	by	Gaussian	noise	(p(y|x)	=	N(y;	ŷ(x;w),	σ²)),	then	finding	weights	
+that	maximize	the	likelihood	of	the	observed	data	is	mathematically	equivalent	to	
+minimizing	MSE.	The	constant	terms	(-m·logσ	and	-(m/2)·log(2π))	vanish	because	
+they	don’t	depend	on	w.	
+Key	nuance:	Every	common	loss	function	is	MLE	under	a	different	distributional	
+assumption.	Gaussian	noise	→	MSE	loss.	Laplacian	noise	→	MAE	(mean	absolute	
+error).	Bernoulli	distribution	(classification)	→	cross-entropy	loss.	Understanding	this	
+lets	you	derive	the	correct	loss	for	your	problem	rather	than	choosing	from	a	menu.	
+
+8.	Frequentist	vs.	Bayesian	Perspective	
+Frequentist:	θ	is	fixed	and	unknown;	θf 	is	random	(depends	on	data).	You	get	one	best	
+point	estimate.	Bayesian:	θ	itself	is	uncertain	(a	random	variable);	data	is	fixed	
+(observed).	You	get	a	full	distribution	over	θ	via	Bayes’	rule:	p(θ|data)	=	p(data|θ)	×	
+p(θ)	/	p(data).	
+The	prior	p(θ)	encodes	beliefs	before	seeing	data.	The	likelihood	p(data|θ)	is	the	
+evidence	from	data.	The	posterior	p(θ|data)	is	your	updated	belief.	
+Key	nuance:	Regularization	and	Bayesian	priors	are	the	same	thing.	L2	regularization	
+=	Gaussian	prior	on	weights.	L1	regularization	=	Laplacian	prior.	No	regularization	=	
+uniform	prior	(all	weight	values	equally	likely	—	an	unreasonable	assumption).	MLE	
+with	regularization	is	secretly	MAP	estimation	(Maximum	A	Posteriori).	Transfer	
+learning	also	connects:	a	pretrained	model’s	weights	act	as	a	highly	informative	prior	
+for	fine-tuning,	which	is	why	it	works	so	well	in	low-resource	settings.	
+
+9.	Stochastic	Gradient	Descent	and	Minibatches	
+For	complex	models	without	closed-form	solutions,	we	optimize	iteratively:	θ	←	θ	−	
+ε∇J(θ).	Full	batch	gradient	descent	computes	the	gradient	over	ALL	training	data	
+before	each	update	—	accurate	but	slow.	SGD	uses	a	random	minibatch	of	m’	
+examples	instead.	
+The	minibatch	gradient	is	an	unbiased	estimate	of	the	true	gradient.	Typical	sizes:	32,	
+64,	128,	256.	Larger	m’	=	smoother	gradients	but	more	computation	per	step	and	
+more	GPU	memory.	Smaller	m’	=	noisier	but	faster	per	step.	
+Key	nuance:	The	noise	in	SGD	is	a	feature,	not	a	bug.	Noisy	gradients	help	the	
+optimizer	escape	shallow	local	minima	and	find	deeper,	better	valleys	—	like	shaking	
+a	ball	on	a	bumpy	surface	so	it	settles	into	the	deepest	hole.	In	LLM	training,	effective	
+batch	sizes	are	very	large	(thousands+),	achieved	via	gradient	accumulation	across	
+multiple	GPUs,	because	stable	gradients	are	needed	at	scale.	
+
+How	It	All	Connects	
+
+ 
+
+
+
+	
+
+Chapter	5	builds	a	coherent	chain:	linear	regression	introduces	the	prediction	
+framework	and	MSE	loss	→	generalization	theory	explains	why	we	care	about	test	
+error	under	i.i.d.	assumptions	→	the	capacity	curve	shows	the	underfitting/overfitting	
+tradeoff	→	regularization	controls	capacity	→	point	estimation	formalizes	how	we	
+evaluate	estimators	via	bias	and	variance	→	MLE	reveals	that	loss	functions	encode	
+distributional	assumptions	→	the	Bayesian	perspective	unifies	regularization	with	
+prior	beliefs	→	SGD	provides	the	practical	optimization	engine	for	complex	models.	
+Every	concept	in	this	chapter	reappears	in	deep	learning:	loss	functions,	
+regularization	(dropout,	weight	decay,	batch	norm),	optimization	(Adam,	learning	
+rate	schedules),	and	the	ongoing	mystery	of	why	over-parameterized	networks	
+generalize.	
+
+ 
+
+
+
+	
+
+Deep Learning Fundamentals — Study Guide	
+Asst. Professor Yiğit Bekir Kaya	
+SWE012 — Deep Learning with Python | Weeks 3–4 | Neural Networks, Backpropagation 
+& Cost Functions	
+	
+
+1. Softmax & Logits	
+Key Formula:  softmax(z)_i = exp(z_i) / Σ_j exp(z_j)	
+
+•  Logits are the raw, unnormalized scores from the final linear layer (before any 
+activation). Example: z = [2.0, 1.0, 0.1] → softmax → [0.659, 0.242, 0.099].	
+
+•  All outputs are in range (0, 1) and sum to exactly 1.0.	
+•  Numerical stability tip: Never apply softmax manually before PyTorch’s 
+
+nn.CrossEntropyLoss — it applies log-softmax internally to avoid exp() 
+overflow.	
+
+2. Cross-Entropy Loss (BCE vs CCE)	
+The general form J(θ) = −E[log p_model(y|x)] derives from maximum likelihood 
+estimation. It has two practical specializations:	
+
+•  BCE (Binary Cross-Entropy): For 2-class problems. Formula: −[y·log(ŷ) + 
+(1−y)·log(1−ŷ)]. Use with sigmoid output.	
+
+•  CCE (Categorical Cross-Entropy): For 3+ class problems. Formula: −Σ 
+y_i·log(ŷ_i). Use with softmax output. Only the true class term survives (one-hot y).	
+
+•  Key property: Gradient is large when prediction is wrong → fast learning. No 
+saturation problem that MSE has with sigmoid outputs.	
+Always pair output activation with the correct loss:	
+Sigmoid → BCE  |  Softmax → CCE  |  Linear → MSE	
+
+3. Why Depth Beats Width	
+•  Each layer “folds” the input space. After L folds, the network can distinguish 
+
+exponentially many (2^L) regions using only a linear number of parameters.	
+•  A shallow-wide network would need exponentially more neurons to match the same 
+
+representational power.	
+•  Practical starting point: 2–3 hidden layers. Add more only if underfitting. Widths: 
+
+64, 128, 256, 512 (powers of 2).	
+•  Modern LLMs use residual (skip) connections: output = x + sublayer(x). Each 
+
+layer learns a small “delta” correction, not a full rewrite. This enables training 
+hundreds of layers without vanishing gradients.	
+
+4. Backpropagation = Chain Rule + Memoization	
+
+ 
+
+
+
+	
+
+During the forward pass, the network stores intermediate activations a^(k) and 
+h^(k) at every layer. These are needed in the backward pass because derivatives 
+of nonlinear functions must be evaluated at the original input value.	
+Concrete example (ReLU):	
+ReLU’(a) = 1 if a > 0, else 0	
+a² = 0.3  →  ReLU’(0.3) = 1  (gradient passes through)	
+a² = −0.3  →  ReLU’(−0.3) = 0  (dead neuron — gradient killed)	
+
+•  Key efficiency: All gradients computed in O(same time as forward pass) by never 
+repeating computations (memoization). PyTorch handles this automatically via 
+loss.backward().	
+
+•  Memory implication: Storing activations for all layers is why GPU memory is the 
+bottleneck in LLM training. Gradient checkpointing trades recompute time to save 
+memory.	
+
+5. Activation Functions	
+•  Use ReLU by default in hidden layers. Simple (max(0,x)), avoids vanishing 
+
+gradients when active, computationally cheap.	
+•  Use sigmoid/tanh only at output layers or for special architectures (e.g., gates in 
+
+LSTMs).	
+•  Dead neuron problem: If a ReLU neuron’s pre-activation is always negative, its 
+
+gradient is always zero — it never learns. Leaky ReLU and ELU are alternatives 
+that address this.	
+
+📋 Quick Reference Card	
+Logits           → raw scores before activation	
+Softmax          → logits to probabilities (multiclass)	
+BCE              → 2 classes, sigmoid output	
+CCE              → 3+ classes, softmax output	
+ReLU             → default hidden activation	
+Depth > Width    → exponential regions, linear params	
+Backprop         → chain rule + stored activations	
+
+Next: Week 4 — Regularization: L1/L2, Dropout, Data Augmentation, Early Stopping	
+
+ 
+
+
+
+	
+
+SWE012 – Deep Learning with Python	
+Week 4 Study Guide: Regularization for Deep Learning	
+
+Asst. Prof. Yiğit Bekir Kaya – İstinye University, Department of Computer Engineering	
+
+	
+
+1. L2 Regularization (Weight Decay)	
+Also known as ridge regression or Tikhonov regularization. L2 regularization adds a penalty 
+proportional to the squared magnitude of the weight vector to the loss function.	
+Penalty term:	
+
+Ω(θ)	=	½||w||₂²	=	½wᵀw	
+The regularized gradient:	
+
+∇𝐰	J0	=	αw	+	∇𝐰	J(w;	X,	y)	
+Weight update rule (Eq. 7.5):	
+
+w	←	(1	−	εα)w	−	ε∇𝐰	J(w;	X,	y)	
+Derivation:	
+Start with the standard gradient descent update w ← w − ε∇J,C  substitute the regularized gradient, 
+and distribute ε (the learning rate). The factor (1 − εα) multiplicatively shrinks weights at every step 
+before the gradient step is applied. Since εα is a small positive number, this factor is slightly less than 
+1, so weights are constantly “decayed” toward zero — hence the name weight decay.	
+Geometric interpretation (Figure 7.1):	
+The solid ellipses are contours of the unregularized loss J. They are elliptical because the loss is more 
+sensitive in some directions than others. The dashed circles are contours of the L2 penalty (all points 
+at equal distance from the origin). The Hessian matrix H (second derivatives of J at the optimum w*) 
+determines the shape of the ellipses: its eigenvectors define the principal axes, and its eigenvalues λᵢ 
+tell you the curvature along each direction.	
+The regularized solution w̃ rescales w* along each eigenvector by the factor λᵢ/(λᵢ + α). Directions 
+with large eigenvalues (high curvature, the loss cares) are barely affected. Directions with small 
+eigenvalues (flat loss surface) are shrunk aggressively toward zero. L2 regularization selectively 
+shrinks the weight components that the data does not strongly need.	
+
+2. L1 Regularization (Lasso)	
+Penalty term (Eq. 7.18):	
+
+Ω(θ)	=	||w||₁	=	Σᵢ|wᵢ|	
+Gradient (sub-gradient, Eq. 7.20):	
+
+ 
+
+
+
+	
+
+∇𝐰	J0	=	α·sign(w)	+	∇𝐰	J(X,	y;	w)	
+Key difference from L2:	
+L2 adds αw to the gradient — proportional to the weight. As w gets small, the force pushing it 
+toward zero weakens (like a rubber band). L1 adds α·sign(w) — a constant force (always ±α) 
+regardless of how small w already is. This constant pressure drives weights all the way to exactly 
+zero.	
+Sparsity and feature selection:	
+A “sparse” model is one where most weight values are literally zero. The analytical solution is: wᵢ = 
+sign(wᵢ*) · max{|wᵢ*| − α/Hᵢᵢ, 0}. Each feature has a threshold α/Hᵢᵢ. If the optimal weight |wᵢ*| is 
+smaller than this threshold, the feature is completely eliminated (set to zero). If above, it survives but 
+is shrunk. This means L1 acts as automatic feature selection: the model itself decides which features 
+to keep.	
+
+3. L1 vs L2 Comparison	
+L2 (Ridge): Penalty ||w||₂². Shrinks weights toward zero but never exactly to zero. Produces small 
+but non-zero weights. Bayesian interpretation: Gaussian prior. Use when all features are relevant.	
+L1 (Lasso): Penalty ||w||₁. Drives weights to exactly zero. Produces sparse weights (feature 
+selection). Bayesian interpretation: Laplace prior. Use when many features are irrelevant.	
+The Bayesian connection:	
+Adding a regularization penalty is mathematically equivalent to assuming a prior distribution over 
+weights and doing MAP (Maximum A Posteriori) estimation. Taking −log of Bayes’ theorem: −log 
+P(w|data) = −log P(data|w) − log P(w). The first term is your loss J, the second is your regularizer. A 
+Gaussian prior P(wᵢ) ∝ exp(−wᵢ²/2σ²) yields L2. A Laplace prior P(wᵢ) ∝ exp(−|wᵢ|/b) yields L1. The 
+Laplace distribution has a sharp spike at zero (concentrating probability mass at zero), which is why 
+L1 produces sparsity.	
+
+4. Norm Penalties as Constrained Optimization	
+The penalty approach (minimize J + αΩ) is equivalent to the constraint approach (minimize J subject 
+to Ω(θ) ≤ k). The parameter k is a budget — the maximum allowed total weight magnitude. For L2, 
+the constraint region is a ball (circle in 2D). For L1, it is a diamond (rotated square in 2D).	
+The diamond’s sharp corners sit on the axes (where one coordinate is exactly zero). The loss contours 
+expanding from w* are much more likely to first touch the diamond at a corner, producing a sparse 
+solution. The L2 ball is smooth, so the contact point typically has all coordinates nonzero.	
+In practice, choosing k directly is hard. Instead, we use the penalty approach: add αΩ(w) to the loss 
+and tune α via validation. Each α implicitly corresponds to some k, but we never need to know it.	
+
+5. Noise Robustness and Label Smoothing	
+
+ 
+
+
+
+	
+
+Noise can be added to inputs (equivalent to a weight penalty for small noise), weights (practical 
+regularizer for RNNs), or outputs (label smoothing). Label smoothing replaces hard targets (0/1) with 
+soft targets: the correct class becomes 1 − ε, each wrong class becomes ε/(k − 1), where k is the 
+number of classes.	
+This prevents the model from pursuing hard probabilities (exactly 0 or 1), which requires very large 
+weights and can never be achieved by a softmax. The typical default is ε = 0.1, popularized by the 
+Inception-v2 paper (Szegedy et al., 2016). Practical range: 0.05 for clean labels, 0.1 as default, 0.2 for 
+noisy datasets.	
+
+6. Semi-Supervised and Self-Supervised Learning	
+Semi-supervised learning uses both labeled (x, y) and unlabeled (x) examples. The core assumption: 
+features useful for modeling P(x) are also useful for predicting y. This is the foundation of modern 
+pre-training.	
+Self-supervised learning is a practical implementation of this idea: it turns unlabeled data into labeled 
+data by creating artificial tasks from the data itself (e.g., BERT’s masked language model predicts 
+missing words, GPT’s next-token prediction). No human annotation is needed. The modern pipeline 
+is: (1) pre-train with self-supervised objectives on massive unlabeled data to learn P(x), then (2) fine-
+tune on small labeled data for the actual task to learn P(y|x). Both approaches rest on the same 
+fundamental assumption: understanding the structure of data gives transferable representations.	
+
+7. Dropout	
+Forward propagation with dropout (3 steps):	
+Step 1: Generate a binary mask μ⁽ˡ⁾ ~ Bernoulli(p), where each entry is 1 with probability p and 0 with 
+probability (1−p). A fresh mask is generated every training step.	
+Step 2: Apply the mask via element-wise multiplication: hC⁽ˡ⁾ = μ⁽ˡ⁾ ⋅ h⁽ˡ⁾. Neurons with mask value 0 are 
+“dropped out” and contribute nothing.	
+Step 3: Feed masked output into the next layer: h⁽ˡ⁺¹⁾ = f(W⁽ˡ⁺¹⁾ hC⁽ˡ⁾ + b⁽ˡ⁺¹⁾).	
+Typical keep probabilities: p = 0.8 for input layers, p = 0.5 for hidden layers. With n neurons, there 
+are 2ⁿ possible sub-networks, so dropout effectively trains an exponential ensemble of models that 
+share weights.	
+Inverted dropout (used by PyTorch and TensorFlow):	
+During training, each neuron’s expected output is p ⋅ h (since it is active only p fraction of the time). 
+At test time all neurons fire, creating a magnitude mismatch. Inverted dropout solves this during 
+training: after masking, divide surviving activations by p. This makes E[output] = p ⋅ (h/p) = h, 
+matching the full-network test-time output. No adjustment is needed at inference. Note: PyTorch’s 
+nn.Dropout(p) parameter is the drop probability (opposite of the keep probability on the slides).	
+
+8. Adversarial Training	
+
+ 
+
+
+
+	
+
+FGSM attack (Fast Gradient Sign Method):	
+x̃	=	x	+	ε	⋅	sign(∇ₓ	J(θ,	x,	y))	
+
+The perturbation is a function of the loss gradient with respect to the input. It computes which 
+direction each pixel should be nudged to maximally increase the loss. The sign function extracts only 
+the direction (+1 or −1), and ε controls the perturbation magnitude (small enough to be invisible to 
+humans).	
+Even tiny per-pixel changes are devastating because in high-dimensional input spaces (e.g., 150,000 
+pixels), all perturbations push in the same “wrong” direction constructively. Training on adversarial 
+examples forces the model to learn smoother decision boundaries, acting as regularization.	
+
+9. Batch Normalization	
+Four steps per mini-batch:	
+(1) Compute batch mean: μᴵ = (1/m) Σ xᵢ. (2) Compute batch variance: σ²ᴵ = (1/m) Σ (xᵢ − μᴵ)². (3) 
+Normalize: x̂i  = (xᵢ − μᴵ) / √(σ²ᴵ + ε). (4) Scale and shift: yᵢ = γ ⋅ x̂i  + β.	
+Why the learnable γ and β?	
+Raw normalization (steps 1–3) forces activations to zero mean and unit variance, which is too 
+restrictive. For example, sigmoid is approximately linear around zero, so forcing inputs there kills the 
+nonlinearity. The learnable parameters γ (scale) and β (shift) let the network learn the optimal 
+distribution for each layer. Crucially, if the network learns γ = σᴵ and β = μᴵ, the normalization is 
+perfectly undone — so batch norm can be a no-op if that is best. The network is never worse off for 
+having batch norm.	
+Benefits: reduces internal covariate shift, allows higher learning rates, acts as a regularizer (each 
+sample is normalized by noisy batch statistics). At test time, running averages (computed during 
+training) replace per-batch statistics.	
+
+Key Takeaways	
+• Regularization trades increased bias for reduced variance to improve generalization.	
+• L2 shrinks weights proportionally (rubber band); L1 applies constant force (drives to exact zero).	
+• Regularizers have Bayesian equivalents: L2 = Gaussian prior, L1 = Laplace prior.	
+• Dropout trains exponentially many sub-networks; inverted dropout compensates during training 
+for clean inference.	
+• Adversarial perturbations exploit the loss gradient w.r.t. inputs; adversarial training regularizes by 
+forcing robust decision boundaries.	
+• Batch normalization stabilizes training; its learnable γ and β ensure expressiveness is never 
+sacrificed for stability.	
+• Self-supervised pre-training is the modern realization of semi-supervised learning: learn P(x) first, 
+fine-tune for P(y|x).	
+
+ 
+
+
+
+	
+
+Reference: Goodfellow, I., Bengio, Y., and Courville, A. (2016). Deep Learning, Chapter 7: 
+Regularization for Deep Learning. MIT Press.	
+
+ 
+
+
+
+	
+SWE012 – Deep Learning with Python	
+Week 5 Study Guide: Optimization for Training Deep Models	
+Asst. Prof. Yiğit Bekir Kaya – İstinye University, Department of Computer Engineering	
+Here is a comprehensive study guide synthesizing all the slides we have covered. I have 
+organized it by the core problems deep learning models face during training, focusing 
+specifically on the intuition and nuances of how each technique solves them.	
+	
+
+Deep Learning Optimization & Stability: A Study Guide	
+The overarching theme of these concepts is stability. Deep neural networks are fragile. If 
+the math isn’t carefully controlled, the learning signal will either die out completely or 
+explode into chaos. Everything below is a method to keep the network in the “Goldilocks 
+zone” so it can actually learn.	
+
+Part 1: The Signal Flow Problem (Initialization)	
+Before a network takes a single learning step, its weights must be assigned starting values. 
+If done poorly, the network is paralyzed from step zero.	
+
+The Nuances of Bad Initialization	
+• Symmetry Breaking (The Clone Problem): If all weights start at the same number 
+
+(e.g., 0.1), every neuron computes the identical thing, receives the identical 
+gradient, and updates identically. The network fails to learn diverse features. 
+Nuance: Initialization must be random. 
+
+• Vanishing Gradients (The Whisper): If starting weights are too small, the gradient 
+signal shrinks exponentially as it multiplies backward through the layers. Early 
+layers hear “nothing” and stop learning. 
+
+• Exploding Gradients (The Megaphone): If starting weights are too large, the 
+signal grows exponentially. The math blows up, and updates become wildly 
+unstable. 
+
+The Solutions: Variance Matching	
+The goal of initialization is to ensure the mathematical variance (the spread of the data) 
+going into a layer is perfectly equal to the variance coming out.	
+
+ 
+
+
+
+	
+
+• Xavier (Glorot) Initialization: Calculates a specific range for random numbers 
+based on the number of inputs and outputs. Nuance: Assumes linear-ish 
+activations. Best for Sigmoid and Tanh. 
+
+• He (Kaiming) Initialization: The Problem: ReLU activations instantly delete all 
+negative numbers, effectively cutting the signal variance in half. Xavier fails here. 
+The Fix: He initialization uses the Xavier logic but mathematically multiplies the 
+variance by 2 to perfectly compensate for the half of the data ReLU threw away. 
+
+Part 2: The Navigation Problem (Optimizers)	
+Once the network is initialized, it has to navigate a complex, multi-dimensional landscape 
+(the loss surface) to find the lowest possible error.	
+
+1. Vanilla Gradient Descent (GD) & Momentum	
+• The Problem: On loss surfaces shaped like narrow canyons (“poor conditioning”), 
+
+standard GD bounces violently back and forth across the steep canyon walls and 
+makes agonizingly slow progress down the actual valley floor. 
+
+• Momentum: Adds “velocity” to the update. It remembers the previous steps. 
+Nuance: The side-to-side bouncing forces cancel each other out, while the tiny 
+pushes forward accumulate, eventually driving the optimizer up to “terminal 
+velocity” straight down the valley. 
+
+• Nesterov Momentum (NAG): Nuance: Standard momentum blindly builds speed 
+and often overshoots the bottom of the hill. Nesterov does a “ghost jump” based 
+on its current velocity, calculates the gradient in the future, and uses that to hit 
+the brakes before overshooting. 
+
+2. Adaptive Learning Rates (AdaGrad, RMSProp, Adam)	
+Standard optimizers use one global learning rate (ε). This forces a compromise: too high, 
+and frequent features (common words) become unstable; too low, and rare features (rare 
+words) never learn.	
+
+• AdaGrad: Gives every single parameter its own learning rate. It divides the global 
+rate by the square root of a historical accumulator of all past gradients (r). The 
+Fatal Flaw: Because it permanently accumulates every gradient, the denominator 
+eventually gets so massive that the learning rate shrinks to exactly 0, and training 
+freezes prematurely. 
+
+• RMSProp: Fixes AdaGrad’s flaw. Nuance: Instead of keeping a permanent history, 
+it uses an Exponentially Weighted Moving Average (a “leaky bucket”). It 
+intentionally forgets older gradients so the learning rate adapts dynamically to the 
+current landscape without shrinking to zero. 
+
+ 
+
+
+
+	
+
+• Adam (Adaptive Moment Estimation): The industry standard. It combines the 
+best of both worlds. Nuance: It tracks the 1st moment (Momentum, for speed and 
+direction) and the 2nd moment (RMSProp, for smart, per-parameter braking). It 
+also includes a “bias correction” to prevent the math from artificially lagging at 
+the very beginning of training. 
+
+Part 3: The Shifting Target Problem (Normalization)	
+Even with perfect initialization and Adam, deep networks suffer from Internal Covariate 
+Shift. As layer 1 updates its weights, it completely changes the mathematical distribution 
+of the data it hands to layer 2. Every layer is constantly trying to learn a moving target.	
+
+Batch Normalization	
+Acts as a quality control checkpoint between layers, forcing the data back into a stable 
+distribution (mean 0, variance 1) for the current mini-batch.	
+
+• The Nuance of γ and β: Forcing data to mean 0, variance 1 can sometimes destroy 
+the network’s expressive power (e.g., squashing data only into the linear part of a 
+Sigmoid curve). So, Batch Norm introduces learnable parameters γ (scale) and β 
+(shift). This allows the network to mathematically “undo” the normalization if it 
+decides a different distribution is actually optimal for that specific layer. 
+
+Layer Norm vs. Batch Norm	
+• Batch Norm calculates statistics across the batch dimension. Flaw: It breaks if 
+
+your batch size is 1, and it struggles heavily with variable-length text sequences 
+(RNNs/Transformers). 
+
+• Layer Norm calculates statistics across the features of a single sample 
+independently. Nuance: Because it doesn’t rely on the batch at all, it is the 
+absolute gold standard for NLP and Transformer architectures (like BERT and 
+GPT).
